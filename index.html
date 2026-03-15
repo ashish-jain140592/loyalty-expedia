@@ -1601,6 +1601,86 @@ function renderProtectionFooterOverlay() {
   hotspotLayer.appendChild(wrap);
 }
 
+// ── Checkout price summary overlay ───────────────────────────────────────────
+// Covers the static price card (PNG y≈448) and redraws it with live state values.
+// PNG positions: price card top y=448, CTA footer top y=730 (SH-82).
+function renderCheckoutOverlay() {
+  var old = document.getElementById('checkoutOverlay');
+  if (old) old.remove();
+
+  var cardTop = px(448);
+  var ctaTop  = px(726); // just above CTA footer
+
+  var wrap = document.createElement('div');
+  wrap.id = 'checkoutOverlay';
+  wrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+
+  // White cover over the static price card + USD note area
+  var cover = document.createElement('div');
+  cover.style.cssText = 'position:absolute;background:#fff;' +
+    'top:' + (cardTop - 4) + 'px;left:0;width:100%;height:' + (ctaTop - cardTop + 8) + 'px;';
+  wrap.appendChild(cover);
+
+  // Dynamic price card
+  var FF = '-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+  var card = document.createElement('div');
+  card.style.cssText =
+    'position:absolute;top:' + cardTop + 'px;left:' + px(16) + 'px;width:' + px(343) + 'px;' +
+    'background:#fff;border:1px solid #DFE0E4;border-radius:' + px(12) + 'px;' +
+    'padding:' + px(14) + 'px ' + px(12) + 'px ' + px(12) + 'px;' +
+    'font-family:' + FF + ';box-sizing:border-box;';
+
+  function row(label, value, labelColor, bold) {
+    var r = document.createElement('div');
+    r.style.cssText = 'display:flex;justify-content:space-between;margin-bottom:' + px(12) + 'px;';
+    var l = document.createElement('span');
+    l.textContent = label;
+    l.style.cssText = 'font-size:' + px(12) + 'px;color:' + (labelColor || '#0C0E1C') + ';';
+    var v = document.createElement('span');
+    v.textContent = value;
+    v.style.cssText = 'font-size:' + px(12) + 'px;font-weight:700;color:#0C0E1C;';
+    r.appendChild(l); r.appendChild(v);
+    return r;
+  }
+  function hr() {
+    var d = document.createElement('div');
+    d.style.cssText = 'height:1px;background:#DFE0E4;margin:' + px(2) + 'px 0 ' + px(12) + 'px;';
+    return d;
+  }
+
+  // Title
+  var title = document.createElement('div');
+  title.textContent = 'Your price summary';
+  title.style.cssText = 'font-size:' + px(14) + 'px;font-weight:700;color:#0C0E1C;margin-bottom:' + px(12) + 'px;font-family:' + FF + ';';
+  card.appendChild(title);
+  card.appendChild(hr());
+
+  // Flight fare (labelled "Traveler 1: Adult" to match the PNG)
+  card.appendChild(row('Traveler 1: Adult  \u25be', '$' + reviewBase.toLocaleString() + '.00', '#0062CC'));
+
+  // Optional line items
+  if (priceDropOn)     { card.appendChild(row('Price Drop Protection',  '$25.00')); }
+  var bsc = seatCost(seatState.bos), isc = seatCost(seatState.icn);
+  if (bsc > 0)         { card.appendChild(row('Seat (BOS \u2192 ICN)',  '$' + bsc + '.00')); }
+  if (isc > 0)         { card.appendChild(row('Seat (ICN \u2192 SIN)',  '$' + isc + '.00')); }
+  if (bagsAdded)       { card.appendChild(row('Checked bag',            '$45.00')); }
+  if (protectionAdded) { card.appendChild(row('Flight Protection Plus', '$89.00')); }
+
+  card.appendChild(hr());
+
+  // Total (right-aligned)
+  var totalRow = document.createElement('div');
+  totalRow.style.cssText = 'display:flex;justify-content:flex-end;';
+  var totalSpan = document.createElement('span');
+  totalSpan.textContent = 'Total: $' + calcTotal().toLocaleString() + '.00';
+  totalSpan.style.cssText = 'font-size:' + px(14) + 'px;font-weight:700;color:#0C0E1C;font-family:' + FF + ';';
+  totalRow.appendChild(totalSpan);
+  card.appendChild(totalRow);
+
+  wrap.appendChild(card);
+  hotspotLayer.appendChild(wrap);
+}
+
 // ── Dynamic price details bottom sheet ────────────────────────────────────────
 function showPriceDetails() {
   var existing = document.getElementById('priceDetailsModal');
@@ -1836,6 +1916,9 @@ function go(idx) {
 
   // Protection footer overlay — correct trip total on protection screens
   if ([3, 4].indexOf(idx) !== -1) { renderProtectionFooterOverlay(); }
+
+  // Checkout overlay — correct price summary on both checkout screens
+  if (idx === 27 || idx === 29) { renderCheckoutOverlay(); }
 
   // Left panel
   var mainIdx = 0;
