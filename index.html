@@ -290,6 +290,60 @@
     font-size: 11px; color: var(--text); font-family: monospace;
   }
 
+  /* ── Password gate ───────────────────────────────────────── */
+  #gate {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  #gate.hidden { display: none; }
+  .gate-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 32px 32px;
+    width: 100%; max-width: 360px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .gate-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--blue); color: #fff;
+    font-size: 22px; font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .gate-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .gate-sub   { font-size: 13px; color: var(--gray); margin-bottom: 24px; }
+  .gate-input {
+    width: 100%; padding: 11px 14px;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    font-size: 15px; color: var(--text);
+    outline: none; margin-bottom: 12px;
+    font-family: inherit; transition: border-color .15s;
+  }
+  .gate-input:focus { border-color: var(--blue); }
+  .gate-input.shake {
+    animation: gateShake .35s ease;
+    border-color: var(--red);
+  }
+  @keyframes gateShake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  .gate-err { font-size: 12px; color: var(--red); min-height: 16px; margin-bottom: 10px; }
+  .gate-btn {
+    width: 100%; padding: 12px;
+    background: var(--blue); color: #fff;
+    border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: background .15s;
+  }
+  .gate-btn:hover { background: var(--blue-dk); }
+
   /* ── Hotspots ────────────────────────────────────────────── */
   #hotspotLayer {
     position: absolute; inset: 0;
@@ -325,6 +379,18 @@
 </style>
 </head>
 <body>
+
+<!-- ── Password gate ──────────────────────────────────────────── -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-icon">E</div>
+    <div class="gate-title">Expedia InsurTech</div>
+    <div class="gate-sub">Enter the password to access this prototype</div>
+    <input id="gateInput" class="gate-input" type="password" placeholder="Password" autocomplete="off">
+    <div class="gate-err" id="gateErr"></div>
+    <button class="gate-btn" id="gateBtn">Continue</button>
+  </div>
+</div>
 
 <!-- ── Header ─────────────────────────────────────────────────── -->
 <header>
@@ -389,6 +455,36 @@
 </footer>
 
 <script>
+// ── Password gate ──────────────────────────────────────────────────────────
+(function() {
+  var PASS = 'loyalty2026'; // ← change this to your preferred password
+  var gate = document.getElementById('gate');
+  var input = document.getElementById('gateInput');
+  var btn   = document.getElementById('gateBtn');
+  var err   = document.getElementById('gateErr');
+
+  function unlock() { gate.classList.add('hidden'); }
+
+  if (sessionStorage.getItem('gateAuth') === '1') { unlock(); return; }
+
+  function attempt() {
+    if (input.value === PASS) {
+      sessionStorage.setItem('gateAuth', '1');
+      unlock();
+    } else {
+      err.textContent = 'Incorrect password. Please try again.';
+      input.classList.add('shake');
+      input.value = '';
+      setTimeout(function() { input.classList.remove('shake'); }, 400);
+      input.focus();
+    }
+  }
+
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') attempt(); });
+  input.focus();
+})();
+
 var SCREENS = [];
 
 SCREENS.push({
