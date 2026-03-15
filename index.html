@@ -78,10 +78,10 @@
   main {
     flex: 1;
     display: grid;
-    grid-template-columns: 280px 1fr 280px;
+    grid-template-columns: 280px 1fr;
     grid-template-rows: 1fr;
     gap: 0;
-    max-width: 1280px;
+    max-width: 960px;
     margin: 0 auto;
     width: 100%;
     padding: 32px 24px;
@@ -265,51 +265,7 @@
   }
   .dot:hover:not(.active) { background: #BDD9FF; }
 
-  /* ── Right panel — flow overview ─────────────────────────── */
-  .panel-right {
-    padding-left: 24px;
-    position: sticky;
-    top: 92px;
-  }
-  .panel-right h3 {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--gray);
-    margin-bottom: 12px;
-  }
-  .thumb-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .thumb-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    border-radius: 10px;
-    cursor: pointer;
-    border: 1.5px solid transparent;
-    transition: all .15s;
-    background: var(--white);
-  }
-  .thumb-item:hover  { border-color: #BDD9FF; }
-  .thumb-item.active { border-color: var(--blue); background: var(--blue-lt); }
-  .thumb-img {
-    width: 36px;
-    border-radius: 5px;
-    overflow: hidden;
-    flex-shrink: 0;
-    line-height: 0;
-    border: 1px solid var(--border);
-  }
-  .thumb-img img { width: 100%; display: block; }
-  .thumb-meta { flex: 1; min-width: 0; }
-  .thumb-num  { font-size: 10px; color: var(--gray); }
-  .thumb-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; }
-  .thumb-star { color: var(--star); font-size: 11px; }
+  /* Right panel removed */
 
   /* ── Footer strip ────────────────────────────────────────── */
   footer {
@@ -357,14 +313,14 @@
     margin-top: 2px;
   }
 
-  /* ── Responsive ──────────────────────────────────────────── */
-  @media (max-width: 900px) {
-    main { grid-template-columns: 1fr; grid-template-rows: auto; padding: 16px; }
-    .panel-left, .panel-right { position: static; padding: 0 0 16px; }
-    .panel-right h3 { display: none; }
-    .thumb-list { flex-direction: row; overflow-x: auto; flex-wrap: nowrap; gap: 8px; }
-    .thumb-item { flex-direction: column; min-width: 70px; padding: 6px; }
-    .thumb-img  { width: 100%; }
+  /* ── Mobile: phone only, centred, nothing else ───────────── */
+  @media (max-width: 768px) {
+    header, footer, .panel-left { display: none; }
+    body { background: #111; flex-direction: row; align-items: center; justify-content: center; min-height: 100vh; }
+    main { flex: none; display: flex; align-items: center; justify-content: center; padding: 0; max-width: none; width: 100%; }
+    .center { gap: 0; }
+    .nav-btn, .progress { display: none; }
+    .phone-wrap { width: min(310px, calc(100vw - 32px)); }
   }
 </style>
 </head>
@@ -418,11 +374,6 @@
     <div class="progress" id="progress"></div>
   </section>
 
-  <!-- Right panel: flow overview -->
-  <aside class="panel-right">
-    <h3>Flow overview</h3>
-    <div class="thumb-list" id="thumbList"></div>
-  </aside>
 
 </main>
 
@@ -1254,6 +1205,29 @@ SCREENS.push({
   ]
 });
 
+// SCREEN 34 — Order confirmation (Korean Air)
+SCREENS.push({
+  file: "08_order_confirmation_ka.png",
+  title: "Order confirmation (Korean Air)",
+  badge: "Success",
+  bClass: "badge-loyalty",
+  star: false,
+  subScreen: true,
+  prevIdx: 27,
+  nextIdx: null,
+  tag: "CONFIRMED",
+  tagClass: "tag-green",
+  body: "Booking success screen — Korean Air variant.",
+  bullets: [
+    "BOS \u2192 ICN: Korean Air KE 81, 11:00am \u2013 5:10pm+1",
+    "ICN \u2192 SIN: Korean Air KE 645, 9:30am \u2013 2:15pm",
+    "Booking reference: EXP-2024-BOS8419"
+  ],
+  hotspots: [
+    { top: 30, left: 0, right: null, width: 46, height: 50, target: 27 }
+  ]
+});
+
 // ── Interactive seat map overlay ───────────────────────────────────────────────
 var seatState = { bos: null, icn: null }; // { ri, ci } per segment
 var priceDropOn      = false; // price drop toggle state (independent of which review screen is shown)
@@ -1445,6 +1419,7 @@ var titleEl   = document.getElementById('screenTitle');
 var badgeEl   = document.getElementById('screenBadge');
 var annotEl   = document.getElementById('annotation');
 var hotspotLayer = document.getElementById('hotspotLayer');
+var phoneScreen  = hotspotLayer.parentElement; // .phone-screen — modal container outside pointer-events:none layer
 
 // Build progress dots (only main flow screens 0-5)
 SCREENS.forEach(function(s, i) {
@@ -1455,22 +1430,24 @@ SCREENS.forEach(function(s, i) {
   progress.appendChild(dot);
 });
 
-// Build thumbnail strip
-SCREENS.forEach(function(s, i) {
-  var item = document.createElement('div');
-  item.className = 'thumb-item' + (i === 0 ? ' active' : '') + (s.subScreen ? ' sub-screen' : '');
-  var starHtml = s.star ? ' <span class="thumb-star">&#9733;</span>' : '';
-  var subLabel = s.subScreen ? '<div class="thumb-sub-label">interaction</div>' : '';
-  item.innerHTML =
-    '<div class="thumb-img"><img src="' + s.file + '" alt="' + s.title + '" loading="lazy"></div>' +
-    '<div class="thumb-meta">' +
-      '<div class="thumb-num">Screen ' + (i + 1) + '</div>' +
-      '<div class="thumb-name">' + s.title + starHtml + '</div>' +
-      subLabel +
-    '</div>';
-  item.addEventListener('click', function() { go(i); });
-  thumbList.appendChild(item);
-});
+// Build thumbnail strip (thumbList removed from layout; loop kept for .thumb-item selectors used by go())
+if (thumbList) {
+  SCREENS.forEach(function(s, i) {
+    var item = document.createElement('div');
+    item.className = 'thumb-item' + (i === 0 ? ' active' : '') + (s.subScreen ? ' sub-screen' : '');
+    var starHtml = s.star ? ' <span class="thumb-star">&#9733;</span>' : '';
+    var subLabel = s.subScreen ? '<div class="thumb-sub-label">interaction</div>' : '';
+    item.innerHTML =
+      '<div class="thumb-img"><img src="' + s.file + '" alt="' + s.title + '" loading="lazy"></div>' +
+      '<div class="thumb-meta">' +
+        '<div class="thumb-num">Screen ' + (i + 1) + '</div>' +
+        '<div class="thumb-name">' + s.title + starHtml + '</div>' +
+        subLabel +
+      '</div>';
+    item.addEventListener('click', function() { go(i); });
+    thumbList.appendChild(item);
+  });
+}
 
 // Build hotspot divs for current screen
 function renderHotspots(s) {
@@ -1535,7 +1512,7 @@ function showPriceDetails() {
 
   var overlay = document.createElement('div');
   overlay.id = 'priceDetailsModal';
-  overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:200;pointer-events:all;';
+  overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:200;';
 
   // Tap-away backdrop
   var backdrop = document.createElement('div');
@@ -1617,7 +1594,7 @@ function showPriceDetails() {
   closeBtn.addEventListener('click', function(e) { e.stopPropagation(); overlay.remove(); });
   sheet.appendChild(closeBtn);
 
-  hotspotLayer.appendChild(overlay);
+  phoneScreen.appendChild(overlay);
 }
 
 // ── Price Drop overlay (drawn on top of whatever review screen is active) ──────
@@ -1708,6 +1685,9 @@ function go(idx) {
   // Flight list: redirect to Korean Air-selected variant when KA is already selected
   if (idx === 7 && lastReviewScreen === 31) { idx = 32; }
   if (idx === 9 && lastReviewScreen === 31) { idx = 33; }
+
+  // Confirmation: show Korean Air version when KA was selected
+  if (idx === 28 && lastReviewScreen === 31) { idx = 34; }
 
   // Back from seats (1) or original flight lists (7, 9) always returns to last review screen
   // (preserves flight change: e.g. stays on Korean Air review instead of resetting to screen 0)
