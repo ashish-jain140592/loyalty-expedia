@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loyalty Segment — Insurance Experience Personalization · Expedia InsurTech</title>
+<style>
+  /* ── Reset & base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:        #0062CC;
+    --blue-lt:     #EBF4FF;
+    --blue-dk:     #004799;
+    --text:        #0C0E1C;
+    --gray:        #67687D;
+    --border:      #DFE0E4;
+    --bg:          #F4F6FA;
+    --white:       #FFFFFF;
+    --star:        #F59E0B;
+    --green:       #00A15E;
+    --red:         #B91C1C;
+    --plat:        #475569;
+    --plat-bg:     #F1F5F9;
+    --phone-shell: #121212;
+    --radius-card: 16px;
+    --shadow:      0 8px 32px rgba(0,0,0,.12);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ── Top header ──────────────────────────────────────────── */
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--blue);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 16px; font-weight: 800;
+  }
+  .logo-text { font-size: 15px; font-weight: 700; color: var(--text); }
+  .logo-sub  { font-size: 12px; color: var(--gray); }
+  .header-badge {
+    background: var(--blue-lt);
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #BDD9FF;
+  }
+
+  /* ── Main layout ─────────────────────────────────────────── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    grid-template-rows: 1fr;
+    gap: 0;
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 32px 24px;
+    align-items: start;
+  }
+
+  /* ── Left panel — screen info ────────────────────────────── */
+  .panel-left {
+    padding-right: 24px;
+    position: sticky;
+    top: 92px;
+  }
+  .step-counter {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--gray);
+    margin-bottom: 6px;
+  }
+  .screen-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+  .screen-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 18px;
+  }
+  .badge-standard    { background: #F1F5F9; color: var(--plat); border: 1px solid #CBD5E1; }
+  .badge-loyalty     { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+  .badge-recovery    { background: #FEF2F2; color: var(--red); border: 1px solid #FECACA; }
+
+  .annotation {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--gray);
+  }
+  .annotation strong { color: var(--text); }
+  .annotation ul { padding-left: 16px; margin-top: 8px; }
+  .annotation li { margin-bottom: 4px; }
+  .annotation .tag {
+    display: inline-block;
+    background: var(--blue-lt);
+    color: var(--blue);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .annotation .tag-green { background: #DCFCE7; color: #166534; }
+  .annotation .tag-red   { background: #FEF2F2; color: var(--red); }
+  .annotation .tag-amber { background: #FEF3C7; color: #92400E; }
+
+  /* ── Center — phone + navigation ────────────────────────── */
+  .center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .nav-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .nav-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  .nav-btn:hover:not(:disabled) {
+    border-color: var(--blue);
+    color: var(--blue);
+    box-shadow: 0 2px 12px rgba(0,98,204,.15);
+  }
+  .nav-btn:disabled { opacity: .3; cursor: default; }
+
+  /* ── Phone mockup ────────────────────────────────────────── */
+  .phone-wrap {
+    position: relative;
+    width: 310px;
+    flex-shrink: 0;
+  }
+  .phone-shell {
+    background: var(--phone-shell);
+    border-radius: 42px;
+    padding: 14px;
+    box-shadow: 0 24px 64px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08) inset;
+    position: relative;
+  }
+  .phone-screen {
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+    line-height: 0;
+  }
+  .phone-screen img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: opacity .2s;
+  }
+  .phone-screen img.fade-out { opacity: 0; }
+  /* Dynamic island */
+  .dynamic-island {
+    position: absolute;
+    top: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 76px; height: 24px;
+    background: var(--phone-shell);
+    border-radius: 12px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  /* Side buttons */
+  .btn-power {
+    position: absolute;
+    right: -4px; top: 120px;
+    width: 4px; height: 68px;
+    background: #333;
+    border-radius: 0 3px 3px 0;
+  }
+  .btn-vol-up {
+    position: absolute;
+    left: -4px; top: 100px;
+    width: 4px; height: 44px;
+    background: #333;
+    border-radius: 3px 0 0 3px;
+  }
+  .btn-vol-dn {
+    position: absolute;
+    left: -4px; top: 156px;
+    width: 4px; height: 44px;
+    background: #333;
+    border-radius: 3px 0 0 3px;
+  }
+
+  /* ── Progress dots ───────────────────────────────────────── */
+  .progress {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .dot.active {
+    background: var(--blue);
+    width: 24px;
+    border-radius: 4px;
+  }
+  .dot:hover:not(.active) { background: #BDD9FF; }
+
+  /* ── Right panel — flow overview ─────────────────────────── */
+  .panel-right {
+    padding-left: 24px;
+    position: sticky;
+    top: 92px;
+  }
+  .panel-right h3 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--gray);
+    margin-bottom: 12px;
+  }
+  .thumb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .thumb-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all .15s;
+    background: var(--white);
+  }
+  .thumb-item:hover  { border-color: #BDD9FF; }
+  .thumb-item.active { border-color: var(--blue); background: var(--blue-lt); }
+  .thumb-img {
+    width: 36px;
+    border-radius: 5px;
+    overflow: hidden;
+    flex-shrink: 0;
+    line-height: 0;
+    border: 1px solid var(--border);
+  }
+  .thumb-img img { width: 100%; display: block; }
+  .thumb-meta { flex: 1; min-width: 0; }
+  .thumb-num  { font-size: 10px; color: var(--gray); }
+  .thumb-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .thumb-star { color: var(--star); font-size: 11px; }
+
+  /* ── Footer strip ────────────────────────────────────────── */
+  footer {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .footer-note {
+    font-size: 11px;
+    color: var(--gray);
+  }
+  .footer-note a { color: var(--blue); text-decoration: none; font-weight: 600; }
+  .kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 6px;
+    font-size: 11px; color: var(--text); font-family: monospace;
+  }
+
+  /* ── Hotspots ────────────────────────────────────────────── */
+  #hotspotLayer {
+    position: absolute; inset: 0;
+    pointer-events: none; z-index: 5;
+  }
+  .hotspot {
+    position: absolute;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 4px;
+    pointer-events: all;
+    transition: background .12s;
+  }
+  .hotspot:hover { background: rgba(0,98,204,.10); }
+
+  /* ── Sub-screen thumbnails ───────────────────────────────── */
+  .thumb-item.sub-screen { background: #f0f4ff; }
+  .thumb-sub-label {
+    font-size: 9px; font-weight: 700; color: var(--blue);
+    text-transform: uppercase; letter-spacing: .04em;
+    margin-top: 2px;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto; padding: 16px; }
+    .panel-left, .panel-right { position: static; padding: 0 0 16px; }
+    .panel-right h3 { display: none; }
+    .thumb-list { flex-direction: row; overflow-x: auto; flex-wrap: nowrap; gap: 8px; }
+    .thumb-item { flex-direction: column; min-width: 70px; padding: 6px; }
+    .thumb-img  { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────── -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">E</div>
+    <div>
+      <div class="logo-text">Expedia InsurTech</div>
+      <div class="logo-sub">Insurance Experience Personalization — Air</div>
+    </div>
+  </div>
+  <span class="header-badge">OneKey Gold / Platinum Segment</span>
+</header>
+
+<!-- ── Main ──────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Left panel: screen info + annotations -->
+  <aside class="panel-left">
+    <div class="step-counter" id="stepCounter">Step 1 of 6</div>
+    <div class="screen-title" id="screenTitle">Review your trip</div>
+    <div class="screen-badge badge-standard" id="screenBadge">Standard</div>
+    <div class="annotation" id="annotation"></div>
+  </aside>
+
+  <!-- Center: phone + nav -->
+  <section class="center">
+    <div class="nav-row">
+      <button class="nav-btn" id="btnPrev" title="Previous (&larr;)" disabled>&#8592;</button>
+
+      <div class="phone-wrap">
+        <div class="phone-shell">
+          <div class="dynamic-island"></div>
+          <div class="phone-screen">
+            <img id="screenImg" src="01_review_trip.png" alt="Screen 1">
+            <div id="hotspotLayer"></div>
+          </div>
+        </div>
+        <div class="btn-power"></div>
+        <div class="btn-vol-up"></div>
+        <div class="btn-vol-dn"></div>
+      </div>
+
+      <button class="nav-btn" id="btnNext" title="Next (&rarr;)">&#8594;</button>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="progress" id="progress"></div>
+  </section>
+
+  <!-- Right panel: flow overview -->
+  <aside class="panel-right">
+    <h3>Flow overview</h3>
+    <div class="thumb-list" id="thumbList"></div>
+  </aside>
+
+</main>
+
+<!-- ── Footer ─────────────────────────────────────────────────── -->
+<footer>
+  <span class="footer-note">Navigate with</span>
+  <span class="kbd">&larr;</span>
+  <span class="kbd">&rarr;</span>
+  <span class="footer-note">arrow keys or click the thumbnails &nbsp;&middot;&nbsp;
+    Segment: <strong>OneKey Gold / Platinum</strong> &nbsp;&middot;&nbsp;
+    PRD: <a href="https://expediagroup.atlassian.net/wiki/spaces/INSRC/pages/1004405659" target="_blank">Insurance Experience Personalization &mdash; Air</a>
+  </span>
+</footer>
+
+<script>
+var SCREENS = [];
+
+SCREENS.push({
+  file: "01_review_trip.png",
+  title: "Review your trip",
+  badge: "Standard",
+  bClass: "badge-standard",
+  star: false,
+  tag: "STEP 1",
+  tagClass: "",
+  body: "Sets the context before the protection step begins. Tap the blue links on the phone to try interactions.",
+  bullets: [
+    "BOS to SIN &middot; Business Class &middot; $3,200 non-refundable",
+    "Non-refundable fare card primes the risk mindset",
+    "<strong>&#x1F4CC; Tap &ldquo;Show details&rdquo;</strong> on either flight to see duration &amp; flight info",
+    "<strong>&#x1F4CC; Tap &ldquo;Change flight&rdquo;</strong> to browse alternatives and swap the flight",
+    "Breadcrumb: <strong>Your flights</strong> &rsaquo; Seats &rsaquo; Bags &rsaquo; Protection"
+  ],
+  hotspots: [
+    { top: 176, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 176, left: null, right: 0,    width: 110, height: 24, target: 7  },
+    { top: 263, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 263, left: null, right: 0,    width: 110, height: 24, target: 9 },
+    { top: 463, left: 225,  right: null, width: 50,  height: 34, target: 25 },
+    { top: 534, left: null, right: 0,    width: 130, height: 20, target: 5  },
+    { top: 574, left: 18,   right: null, width: 80,  height: 20, target: 11 },
+    { top: 557, left: 153,  right: null, width: 117, height: 39, target: 1  }
+  ]
+});
+
+SCREENS.push({
+  file: "02_choose_seats.png",
+  title: "Choose your seats",
+  badge: "Standard",
+  bClass: "badge-standard",
+  star: false,
+  tag: "STEP 2",
+  tagClass: "",
+  body: "Seat selection. Rows 1&ndash;4 are $25, rows 5+ are free. Tap any seat to select. Tap the ICN&rarr;SIN tab to switch segments.",
+  bullets: [
+    "No pre-selected seat &mdash; traveler pill shows &ldquo;No seat selected&rdquo;",
+    "Rows 1&ndash;4: $25 paid seats (white, bordered)",
+    "Rows 5&ndash;9: $0 free seats (blue background)",
+    "<strong>&#x1F4CC; Tap any seat</strong> to see selection state + updated total",
+    "<strong>&#x1F4CC; Tap ICN &rarr; SIN tab</strong> to view second segment",
+    "<strong>&#x1F4CC; Tap Price details</strong> for itemised breakdown"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 0  },
+    { top: 120, left: 141, right: null, width: 123, height: 30, target: 14 },
+    { top: 584, left: 18,  right: null, width: 75,  height: 16, target: 13 },
+    { top: 564, left: 153, right: null, width: 117, height: 36, target: 2  }
+  ]
+});
+
+SCREENS.push({
+  file: "03_add_bags.png",
+  title: "Add your bags",
+  badge: "Standard",
+  bClass: "badge-standard",
+  star: false,
+  tag: "STEP 3",
+  tagClass: "",
+  body: "Standard baggage step. Checked bag added, making full trip investment visible before the protection decision.",
+  bullets: [
+    "Personal item &amp; carry-on: included",
+    "Checked bag: +$45 per traveler (checkbox ticked)",
+    "Trip total now $3,245 &mdash; full investment visible",
+    "Breadcrumb: Your flights &rsaquo; Seats &rsaquo; <strong>Bags</strong> &rsaquo; Protection"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 1  },
+    { top: 131, left: 141, right: null, width: 123, height: 30, target: 21 },
+    { top: 332, left: 229, right: null, width: 53,  height: 54, target: 19 },
+    { top: 578, left: 18,  right: null, width: 75,  height: 14, target: 16 },
+    { top: 557, left: 153, right: null, width: 117, height: 39, target: 3  }
+  ]
+});
+
+SCREENS.push({
+  file: "04_add_protection.png",
+  title: "Add your protection",
+  badge: "Loyalty personalised",
+  bClass: "badge-loyalty",
+  star: true,
+  tag: "KEY SCREEN",
+  tagClass: "tag-amber",
+  body: "Platinum-personalised screen with coverage meter bars. Soft, informational framing — no alarming language.",
+  bullets: [
+    "<strong>Personalised header:</strong> \"Welcome back Sandra, this is your 5th booking with us this year\"",
+    "<strong>3 coverage bars:</strong> Emergency evacuation &middot; Medical expenses &middot; Trip cancellation",
+    "<strong>Bar metaphor:</strong> gray (card) + white tick + blue (plan extends here)",
+    "Emergency evacuation 10:1 ratio &mdash; tiny gray nub vs long blue bar shows risk immediately",
+    "<strong>No gap badges, no red</strong> &mdash; comparison is informational not alarming",
+    "<strong>CTA:</strong> &ldquo;Skip&rdquo; in sticky footer &mdash; low pressure"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 2  },
+    { top: 565, left: 18,  right: null, width: 75,  height: 14, target: 23 },
+    { top: 396, left: 18,  right: null, width: 246, height: 42, target: 4  },
+    { top: 546, left: 153, right: null, width: 117, height: 36, target: 29 }
+  ]
+});
+
+SCREENS.push({
+  file: "05_protection_added.png",
+  title: "Protection added",
+  badge: "Loyalty personalised",
+  bClass: "badge-loyalty",
+  star: true,
+  subScreen: true,
+  prevIdx: 3,
+  nextIdx: null,
+  tag: "PROTECTION ADDED",
+  tagClass: "tag-green",
+  body: "Confirmation state. Checkbox ticked, totals updated, CTA advances to Checkout.",
+  bullets: [
+    "Checkbox: ticked (blue fill + white checkmark)",
+    "Protection total: $89",
+    "Trip total: $3,334",
+    "CTA: \"Next: Checkout\""
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 3  },
+    { top: 396, left: 18,  right: null, width: 246, height: 42, target: 3  },
+    { top: 565, left: 18,  right: null, width: 75,  height: 14, target: 24 },
+    { top: 546, left: 153, right: null, width: 117, height: 36, target: 27 }
+  ]
+});
+
+SCREENS.push({
+  file: "06_recovery_modal.png",
+  title: "Post-checkout recovery",
+  badge: "If declined",
+  bClass: "badge-recovery",
+  star: false,
+  tag: "RECOVERY",
+  tagClass: "tag-red",
+  body: "Triggered only if the traveler declined at Step 4. Bottom sheet modal over the checkout page.",
+  bullets: [
+    "One gap only &mdash; the most critical: emergency evacuation",
+    "Dollar-specific: \"Typical travel card: $0&ndash;$25,000 &middot; Your gap: up to $225,000\"",
+    "CTA: \"Add coverage &mdash; $89\" &rarr; opens price confirmation modal",
+    "Light-pressure &mdash; one-time offer, not repeated after dismiss"
+  ],
+  hotspots: [
+    { top: 505, left: 18, right: null, width: 246, height: 39, target: 30 }
+  ]
+});
+
+// ── Interaction sub-screens (accessed via hotspots on Screen 1) ──────────────
+SCREENS.push({
+  file: "01b_show_details.png",
+  title: "Flight details",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "SHOW DETAILS",
+  tagClass: "",
+  subScreen: true,
+  prevIdx: 0,
+  nextIdx: null,
+  body: "Accessed by tapping 'Show details' on Screen 1. Shows full BOS \u2192 ICN segment breakdown.",
+  bullets: [
+    "Duration prominently shown: 18h 15m, Nonstop",
+    "Terminal info: Terminal E (BOS) \u2192 Terminal 2 (ICN)",
+    "Flight SQ 12 \u00b7 Boeing 777-300ER \u00b7 Business Class (W)",
+    "Baggage: 2 \u00d7 32 kg checked bags included",
+    "'Back to review' CTA returns to Screen 1"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 0 },
+    { top: 557, left: 153, right: null, width: 117, height: 39, target: 0 }
+  ]
+});
+
+SCREENS.push({
+  file: "01c_flight_list.png",
+  title: "Change flight",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "FLIGHT LIST",
+  tagClass: "",
+  subScreen: true,
+  prevIdx: 0,
+  nextIdx: null,
+  body: "Accessed by tapping 'Change flight'. Shows BOS \u2192 ICN alternatives.",
+  bullets: [
+    "3 options: Singapore Airlines SQ 12 (current), Korean Air KE 81, Asiana OZ 201",
+    "Current selection highlighted with blue border + 'Selected' badge",
+    "<strong>&#x1F4CC; Tap 'Select' on Korean Air</strong> to update the review screen",
+    "Korean Air saves $250 vs original ($2,950 vs $3,200)"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46, height: 50, target: 0 },
+    { top: 246, left: 210, right: null, width: 62, height: 26, target: 31 }
+  ]
+});
+
+SCREENS.push({
+  file: "01d_review_updated.png",
+  title: "Review (Korean Air)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "UPDATED",
+  tagClass: "tag-green",
+  subScreen: true,
+  prevIdx: 7,
+  nextIdx: 1,
+  body: "Review screen after selecting Korean Air. Blue border confirms the changed flight. Trip total updated.",
+  bullets: [
+    "BOS \u2192 ICN: Korean Air KE 81, 11:00am \u2013 5:10pm+1, 18h 10m",
+    "Blue border on the changed flight card confirms the update",
+    "Trip total: $2,950 (saving $250 vs Singapore Airlines)",
+    "Flow continues normally: Next: Seats \u2192 Bags \u2192 Protection"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,    right: null, width: 46,  height: 50, target: 7  },
+    { top: 176, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 176, left: null, right: 0,    width: 110, height: 24, target: 7  },
+    { top: 263, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 263, left: null, right: 0,    width: 110, height: 24, target: 9 },
+    { top: 463, left: 225,  right: null, width: 50,  height: 34, target: 25 },
+    { top: 534, left: null, right: 0,    width: 130, height: 20, target: 29 },
+    { top: 557, left: 153,  right: null, width: 117, height: 39, target: 1  }
+  ]
+});
+
+SCREENS.push({
+  file: "01g_flight_list_icn.png",
+  title: "Change flight ICN \u2192 SIN",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 0,
+  nextIdx: null,
+  tag: "FLIGHT LIST",
+  tagClass: "",
+  body: "ICN \u2192 SIN flight alternatives. Tap \u2018Select\u2019 on Korean Air to update the review screen.",
+  bullets: [
+    "3 options: Singapore Airlines SQ 22 (current), Korean Air KE 645, Asiana OZ 101",
+    "Current selection highlighted with blue border + \u2018Selected\u2019 badge",
+    "<strong>&#x1F4CC; Tap \u2018Select\u2019 on Korean Air</strong> to update the review screen",
+    "Korean Air saves $250 vs original ($2,950 vs $3,200)"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46, height: 50, target: 0  },
+    { top: 246, left: 210, right: null, width: 62, height: 26, target: 31 }
+  ]
+});
+
+SCREENS.push({
+  file: "01h_review_updated_icn.png",
+  title: "Review (Korean Air ICN\u2192SIN)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 9,
+  nextIdx: 1,
+  tag: "UPDATED",
+  tagClass: "tag-green",
+  body: "Review screen after selecting Korean Air for the ICN \u2192 SIN leg. Blue border confirms the changed segment.",
+  bullets: [
+    "BOS \u2192 ICN: Singapore Airlines (unchanged)",
+    "ICN \u2192 SIN: Korean Air KE 645, 9:30am \u2013 2:15pm, 6h 45m (blue border)",
+    "Trip total: $2,950 (saving $250)",
+    "Flow continues: Next: Seats \u2192 Bags \u2192 Protection"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,    right: null, width: 46,  height: 50, target: 9 },
+    { top: 176, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 176, left: null, right: 0,    width: 110, height: 24, target: 7  },
+    { top: 263, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 263, left: null, right: 0,    width: 110, height: 24, target: 9 },
+    { top: 463, left: 225,  right: null, width: 50,  height: 34, target: 25 },
+    { top: 534, left: null, right: 0,    width: 130, height: 20, target: 29 },
+    { top: 557, left: 153,  right: null, width: 117, height: 39, target: 1  }
+  ]
+});
+
+SCREENS.push({
+  file: "01i_price_details_base.png",
+  title: "Price details (base fare)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 0,
+  nextIdx: null,
+  tag: "PRICE DETAILS",
+  tagClass: "",
+  body: "Tapping \u2018Price details\u2019 on Screen 1 shows a bottom sheet with the base ticket value only. Seats, bags and protection are added later.",
+  bullets: [
+    "Flight fare (BOS \u2192 SIN): $3,200.00",
+    "Total: $3,200.00",
+    "Note: \u201cSeats, bags & protection added in next steps\u201d",
+    "CTA: \u2018Close\u2019 \u2192 back to review"
+  ],
+  hotspots: [
+    { top: 558, left: 18, right: null, width: 246, height: 33, target: 0 }
+  ]
+});
+
+// ── Seat interaction sub-screens ─────────────────────────────────────────────
+SCREENS.push({
+  file: "02b_seat_selected.png",
+  title: "Seat 2A selected",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "SEAT SELECTED",
+  tagClass: "tag-green",
+  subScreen: true,
+  prevIdx: 1,
+  nextIdx: 2,
+  body: "Selecting seat 2A ($25) updates the traveler pill, seat count, and trip total live.",
+  bullets: [
+    "Traveler pill: \"Traveler 1 — Seat 2A (Business)\"",
+    "Count: \"1 of 1 seat selected\"",
+    "Seat total: $25  ·  Trip total: $3,225",
+    "Seat highlighted in blue with ✓",
+    "<strong>&#x1F4CC; Tap 'Price details'</strong> to see full breakdown"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 1  },
+    { top: 584, left: 18,  right: null, width: 75,  height: 16, target: 16 },
+    { top: 120, left: 141, right: null, width: 123, height: 30, target: 14 },
+    { top: 564, left: 153, right: null, width: 117, height: 36, target: 2  }
+  ]
+});
+
+SCREENS.push({
+  file: "02c_price_details.png",
+  title: "Price details",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "PRICE DETAILS",
+  tagClass: "",
+  subScreen: true,
+  prevIdx: 1,
+  nextIdx: null,
+  body: "Bottom sheet accessed via 'Price details' link. Breaks down every line item.",
+  bullets: [
+    "Base fare: $3,200",
+    "Seat 2A: — (not yet selected in this view)",
+    "Bags: — (not yet added)",
+    "Taxes & fees: Included",
+    "Trip total: $3,200",
+    "'Close' CTA returns to seats"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 1 },
+    { top: 552, left: 18,  right: null, width: 246, height: 36, target: 1 }
+  ]
+});
+
+SCREENS.push({
+  file: "02d_seats_icn_sin.png",
+  title: "Seats ICN \u2192 SIN",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "SECOND SEGMENT",
+  tagClass: "",
+  subScreen: true,
+  prevIdx: 1,
+  nextIdx: null,
+  body: "ICN \u2192 SIN tab. Same seat selection flow repeats for the second segment.",
+  bullets: [
+    "Tab switches to ICN \u2192 SIN · Jun 15",
+    "Fresh seat map — no selection yet",
+    "0 of 1 seat selected",
+    "Tap BOS \u2192 ICN tab to go back"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 1  },
+    { top: 120, left: 0,   right: null, width: 141, height: 30, target: 1  },
+    { top: 584, left: 18,  right: null, width: 75,  height: 16, target: 16 },
+    { top: 564, left: 153, right: null, width: 117, height: 36, target: 2  }
+  ]
+});
+
+SCREENS.push({
+  file: "02e_seat_selected_free.png",
+  title: "Seat 6D selected ($0)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "SEAT SELECTED",
+  tagClass: "tag-green",
+  subScreen: true,
+  prevIdx: 1,
+  nextIdx: 2,
+  body: "Selecting a $0 free seat (6D). Traveler pill and count update; trip total unchanged.",
+  bullets: [
+    "Traveler pill: \"Traveler 1 &mdash; Seat 6D (Business)\"",
+    "Count: \"1 of 1 seat selected\"",
+    "Seat total: $0  &middot;  Trip total: $3,200 (unchanged)",
+    "Seat highlighted in blue with \u2713"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 1  },
+    { top: 584, left: 18,  right: null, width: 75,  height: 16, target: 16 },
+    { top: 120, left: 141, right: null, width: 123, height: 30, target: 14 },
+    { top: 564, left: 153, right: null, width: 117, height: 36, target: 2  }
+  ]
+});
+
+// ── New sub-screens: indices 13-17 ───────────────────────────────────────────
+SCREENS.push({
+  file: "02c_price_details_seat.png",
+  title: "Price details (1 seat)",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "PRICE DETAILS", tagClass: "", subScreen: true, prevIdx: 9, nextIdx: null,
+  body: "Price breakdown after selecting seat 3B on BOS\u2192ICN. ICN\u2192SIN not yet selected.",
+  bullets: [
+    "Base fare: $3,200",
+    "Seat 3B \u00b7 BOS\u2192ICN: $25",
+    "Seat \u00b7 ICN\u2192SIN: \u2014",
+    "Checked bag: \u2014",
+    "Trip total: $3,225"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,  right: null, width: 46,  height: 50, target: 12 },
+    { top: 552, left: 18, right: null, width: 246, height: 36, target: 12 }
+  ]
+});
+
+SCREENS.push({
+  file: "02c_price_details_both.png",
+  title: "Price details (2 seats)",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "PRICE DETAILS", tagClass: "", subScreen: true, prevIdx: 15, nextIdx: null,
+  body: "Price breakdown after selecting seats on both segments.",
+  bullets: [
+    "Seat 3B \u00b7 BOS\u2192ICN: $25",
+    "Seat 6D \u00b7 ICN\u2192SIN: $0",
+    "Checked bag: \u2014",
+    "Trip total: $3,225"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,  right: null, width: 46,  height: 50, target: 18 },
+    { top: 552, left: 18, right: null, width: 246, height: 36, target: 18 }
+  ]
+});
+
+SCREENS.push({
+  file: "02d_seats_icn_sin_sel.png",
+  title: "ICN \u2192 SIN seat selected",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "SECOND SEGMENT", tagClass: "tag-green", subScreen: true, prevIdx: 11, nextIdx: 2,
+  body: "Seat 6D selected on ICN\u2192SIN segment. Both segments now have seats.",
+  bullets: [
+    "Seat 6D (Business) \u2014 free $0 seat",
+    "Traveler pill updated: \u201cSeat 6D (Business)\u201d",
+    "<strong>&#x1F4CC; Tap Price details</strong> to see both seats",
+    "Next: Bags advances to the bags screen"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 14 },
+    { top: 120, left: 0,   right: null, width: 141, height: 30, target: 12  },
+    { top: 584, left: 18,  right: null, width: 75,  height: 16, target: 17 },
+    { top: 564, left: 153, right: null, width: 117, height: 36, target: 2  }
+  ]
+});
+
+SCREENS.push({
+  file: "03a_bags_selected.png",
+  title: "Bags: checked bag added",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "BAG SELECTED", tagClass: "tag-green", subScreen: true, prevIdx: 2, nextIdx: 3,
+  body: "2nd checked bag ticked. Bags total and trip total update.",
+  bullets: [
+    "Checkbox ticked: blue fill + white checkmark",
+    "Bags total: $45",
+    "Trip total: $3,245",
+    "<strong>&#x1F4CC; Tap Price details</strong> to see seat + bag breakdown",
+    "Tap checkbox again to deselect"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 2  },
+    { top: 131, left: 141, right: null, width: 123, height: 30, target: 22 },
+    { top: 332, left: 229, right: null, width: 53,  height: 54, target: 2  },
+    { top: 578, left: 18,  right: null, width: 75,  height: 14, target: 20 },
+    { top: 557, left: 153, right: null, width: 117, height: 39, target: 3  }
+  ]
+});
+
+SCREENS.push({
+  file: "03b_price_details_bags.png",
+  title: "Price details (seat + bag)",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "PRICE DETAILS", tagClass: "", subScreen: true, prevIdx: 16, nextIdx: null,
+  body: "Full price breakdown: seat 3B + checked bag.",
+  bullets: [
+    "Seat 3B \u00b7 BOS\u2192ICN: $25",
+    "Seat \u00b7 ICN\u2192SIN: \u2014",
+    "Checked bag: $45",
+    "Trip total: $3,270"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,  right: null, width: 46,  height: 50, target: 19 },
+    { top: 552, left: 18, right: null, width: 246, height: 36, target: 19 }
+  ]
+});
+
+// ── Bags ICN→SIN sub-screens (indices 18-19) ─────────────────────────────────
+SCREENS.push({
+  file: "03c_bags_icn_sin.png",
+  title: "Bags: ICN \u2192 SIN",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "SECOND SEGMENT", tagClass: "",
+  subScreen: true, prevIdx: 2, nextIdx: null,
+  body: "ICN \u2192 SIN bags tab. Add a checked bag independently for the second segment.",
+  bullets: [
+    "ICN \u2192 SIN tab active",
+    "No bags pre-selected for this segment",
+    "Trip total: $3,200",
+    "<strong>&#x1F4CC; Tap BOS \u2192 ICN tab</strong> to return",
+    "<strong>&#x1F4CC; Tap 2nd checked bag</strong> to add it"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 2  },
+    { top: 131, left: 18,  right: null, width: 123, height: 30, target: 2  },
+    { top: 332, left: 229, right: null, width: 53,  height: 54, target: 22 },
+    { top: 578, left: 18,  right: null, width: 75,  height: 14, target: 16 },
+    { top: 557, left: 153, right: null, width: 117, height: 39, target: 3  }
+  ]
+});
+
+SCREENS.push({
+  file: "03d_bags_icn_sin_sel.png",
+  title: "Bags: ICN \u2192 SIN (bag added)",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "SECOND SEGMENT", tagClass: "tag-green",
+  subScreen: true, prevIdx: 18, nextIdx: 3,
+  body: "2nd checked bag added on ICN \u2192 SIN. Bags total and trip total update.",
+  bullets: [
+    "ICN \u2192 SIN tab active, bag ticked",
+    "Bags total: $45  \u00b7  Trip total: $3,245",
+    "<strong>&#x1F4CC; Tap BOS \u2192 ICN tab</strong> to see BOS leg with bag",
+    "<strong>&#x1F4CC; Tap Price details</strong> for breakdown",
+    "Tap checkbox again to deselect"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 19 },
+    { top: 131, left: 18,  right: null, width: 123, height: 30, target: 19 },
+    { top: 332, left: 229, right: null, width: 53,  height: 54, target: 21 },
+    { top: 578, left: 18,  right: null, width: 75,  height: 14, target: 20 },
+    { top: 557, left: 153, right: null, width: 117, height: 39, target: 3  }
+  ]
+});
+
+// ── Protection price details sub-screens (indices 20-21) ─────────────────────
+SCREENS.push({
+  file: "04b_price_details_prot.png",
+  title: "Price details (protection)",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "PRICE DETAILS", tagClass: "",
+  subScreen: true, prevIdx: 3, nextIdx: null,
+  body: "Price breakdown on protection screen before adding coverage.",
+  bullets: [
+    "Base fare: $3,200",
+    "Seat \u00b7 BOS\u2192ICN: \u2014",
+    "Checked bag: $45",
+    "Flight Protection Plus: \u2014",
+    "Trip total: $3,245"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,  right: null, width: 46,  height: 50, target: 3 },
+    { top: 552, left: 18, right: null, width: 246, height: 36, target: 3 }
+  ]
+});
+
+SCREENS.push({
+  file: "04c_price_details_prot_add.png",
+  title: "Price details (protection added)",
+  badge: "Interaction", bClass: "badge-standard", star: false,
+  tag: "PRICE DETAILS", tagClass: "tag-green",
+  subScreen: true, prevIdx: 4, nextIdx: null,
+  body: "Price breakdown after adding Flight Protection Plus.",
+  bullets: [
+    "Base fare: $3,200",
+    "Checked bag: $45",
+    "Flight Protection Plus: $89",
+    "Trip total: $3,334"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,  right: null, width: 46,  height: 50, target: 4 },
+    { top: 552, left: 18, right: null, width: 246, height: 36, target: 4 }
+  ]
+});
+
+// ── Review (price drop on) sub-screen ─────────────────────────────────────────
+SCREENS.push({
+  file: "01e_review_protected.png",
+  title: "Review (price drop on)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "PRICE DROP ON",
+  tagClass: "tag-green",
+  subScreen: true,
+  prevIdx: 0,
+  nextIdx: 1,
+  body: "Toggle-ON state: Price Drop Protection active. Trip total updates to $3,225. Tap toggle to turn it off.",
+  bullets: [
+    "Toggle pill: blue fill, knob on the right (ON)",
+    "Trip total: $3,225 (+$25 Price Drop Protection)",
+    "<strong>&#x1F4CC; Tap &ldquo;Price details&rdquo;</strong> to see $25 line item",
+    "<strong>&#x1F4CC; Tap the toggle</strong> to turn off (returns to $3,200)"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,   right: null, width: 46,  height: 50, target: 0  },
+    { top: 463, left: 225, right: null, width: 50,  height: 34, target: 0  },
+    { top: 572, left: 0,   right: null, width: 110, height: 22, target: 26 },
+    { top: 534, left: null, right: 0,   width: 130, height: 20, target: 5  },
+    { top: 557, left: 153, right: null, width: 117, height: 39, target: 1  }
+  ]
+});
+
+SCREENS.push({
+  file: "01f_price_details_review.png",
+  title: "Price details (price drop on)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  tag: "PRICE DETAILS",
+  tagClass: "",
+  subScreen: true,
+  prevIdx: 22,
+  nextIdx: null,
+  body: "Price breakdown showing the $25 Price Drop Protection line item.",
+  bullets: [
+    "Base fare: $3,200",
+    "Price Drop Protection: $25",
+    "Trip total: $3,225"
+  ],
+  hotspots: [
+    { top: 543, left: 18, right: null, width: 246, height: 36, target: 25 }
+  ]
+});
+
+SCREENS.push({
+  file: "07_checkout.png",
+  title: "Secure checkout",
+  badge: "With protection",
+  bClass: "badge-loyalty",
+  star: false,
+  subScreen: true,
+  prevIdx: 4,
+  nextIdx: null,
+  tag: "CHECKOUT",
+  tagClass: "tag-green",
+  body: "Final checkout screen shown when traveler adds Flight Protection Plus. Summarises the full booking before payment.",
+  bullets: [
+    "Free cancellation reminder card",
+    "OneKeyCash loyalty banner",
+    "Multi-city flight summary: BOS \u2192 ICN \u2192 SIN",
+    "Price summary: $3,200 fare + $89 protection = <strong>$3,289</strong>",
+    "CTA: \u201cComplete Booking\u201d \u2014 full-width pill button"
+  ],
+  hotspots: [
+    { top: 30,  left: 0,  right: null, width: 46,  height: 50, target: 4  },
+    { top: 558, left: 18, right: null, width: 246, height: 39, target: 28 }
+  ]
+});
+
+SCREENS.push({
+  file: "08_order_confirmation.png",
+  title: "Order confirmation",
+  badge: "Success",
+  bClass: "badge-loyalty",
+  star: false,
+  subScreen: true,
+  prevIdx: 24,
+  nextIdx: null,
+  tag: "CONFIRMED",
+  tagClass: "tag-green",
+  body: "Booking success screen. Shown after the traveler completes checkout with Flight Protection Plus.",
+  bullets: [
+    "\u201cYou are on your way!\u201d \u2014 success heading",
+    "\u201cFlight booked successfully\u201d in green",
+    "Booking reference: EXP-2024-BOS8419",
+    "Multi-city trip summary: BOS \u2192 ICN \u2192 SIN",
+    "OneKeyCash earned banner",
+    "CTA: \u201cView booking details\u201d"
+  ],
+  hotspots: [
+    { top: 30, left: 0, right: null, width: 46, height: 50, target: 27 }
+  ]
+});
+
+SCREENS.push({
+  file: "07b_checkout_no_prot.png",
+  title: "Secure checkout (no protection)",
+  badge: "Without protection",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 3,
+  nextIdx: null,
+  tag: "CHECKOUT",
+  tagClass: "",
+  body: "Checkout screen shown when traveler skips protection. Price reflects base fare only.",
+  bullets: [
+    "Same layout as protected checkout",
+    "Price summary: $3,200 fare only \u2014 no protection line",
+    "Total: $3,200.00",
+    "CTA: \u201cComplete Booking\u201d \u2192 post-checkout recovery modal"
+  ],
+  hotspots: [
+    { top: 30,  left: 0,  right: null, width: 46,  height: 50, target: 3  },
+    { top: 558, left: 18, right: null, width: 246, height: 39, target: 5  }
+  ]
+});
+
+SCREENS.push({
+  file: "06b_add_prot_confirm.png",
+  title: "Confirm protection coverage",
+  badge: "Confirmation modal",
+  bClass: "badge-recovery",
+  star: false,
+  subScreen: true,
+  prevIdx: 5,
+  nextIdx: null,
+  tag: "CONFIRM MODAL",
+  tagClass: "tag-amber",
+  body: "Bottom-sheet confirmation shown when traveler taps \u201cAdd coverage\u201d on the recovery modal. Displays the full updated price breakdown before committing.",
+  bullets: [
+    "Flight fare: $3,200",
+    "Seat (BOS \u2192 ICN): $25",
+    "Checked bag (ICN \u2192 SIN): $45",
+    "Flight Protection Plus: +$89 (highlighted green)",
+    "<strong>New total: $3,359.00</strong>",
+    "Primary CTA: \u201cConfirm \u2014 $3,359.00\u201d \u2192 order confirmation",
+    "Secondary: \u201cCancel\u201d \u2192 back to recovery modal"
+  ],
+  hotspots: [
+    { top: 518, left: 18,  right: null, width: 246, height: 39, target: 28 },
+    { top: 566, left: 101, right: null, width: 80,  height: 28, target: 5  }
+  ]
+});
+
+SCREENS.push({
+  file: "01j_review_updated_both.png",
+  title: "Review (both Korean Air)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 7,
+  nextIdx: 1,
+  tag: "BOTH UPDATED",
+  tagClass: "tag-green",
+  body: "Both legs changed to Korean Air. Blue border on each flight card. Trip total: $2,950.",
+  bullets: [
+    "BOS \u2192 ICN: Korean Air KE 81 (blue border)",
+    "ICN \u2192 SIN: Korean Air KE 645 (blue border)",
+    "Trip total: $2,950 (saving $250)",
+    "Changing either leg triggers this synced view"
+  ],
+  hotspots: [
+    { top: 38,  left: 0,    right: null, width: 46,  height: 50, target: 7  },
+    { top: 176, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 176, left: null, right: 0,    width: 110, height: 24, target: 7  },
+    { top: 263, left: 0,    right: null, width: 135, height: 24, target: 6  },
+    { top: 263, left: null, right: 0,    width: 110, height: 24, target: 9  },
+    { top: 463, left: 225,  right: null, width: 50,  height: 34, target: 25 },
+    { top: 534, left: null, right: 0,    width: 130, height: 20, target: 29 },
+    { top: 557, left: 153,  right: null, width: 117, height: 39, target: 1  }
+  ]
+});
+
+// SCREEN 32 — Change flight BOS→ICN with Korean Air already selected
+SCREENS.push({
+  file: "01k_flight_list_ka.png",
+  title: "Change flight (KA selected)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 31,
+  nextIdx: 31,
+  hotspots: [
+    // Back arrow → return to Korean Air review (target:31 directly, no redirect needed)
+    { top: 38,  left: 0,   right: null, width: 46, height: 50, target: 31 },
+    // Singapore Airlines "Select" button → switch back to SQ review (screen 0)
+    { top: 176, left: 210, right: null, width: 62, height: 26, target: 0  }
+    // Korean Air row has "Selected" badge — no tap target
+  ]
+});
+
+// SCREEN 33 — Change flight ICN→SIN with Korean Air already selected
+SCREENS.push({
+  file: "01l_flight_list_icn_ka.png",
+  title: "Change flight ICN (KA selected)",
+  badge: "Interaction",
+  bClass: "badge-standard",
+  star: false,
+  subScreen: true,
+  prevIdx: 31,
+  nextIdx: 31,
+  hotspots: [
+    // Back arrow → return to Korean Air review
+    { top: 38,  left: 0,   right: null, width: 46, height: 50, target: 31 },
+    // Singapore Airlines "Select" button → switch back to SQ review (screen 0)
+    { top: 176, left: 210, right: null, width: 62, height: 26, target: 0  }
+  ]
+});
+
+// ── Interactive seat map overlay ───────────────────────────────────────────────
+var seatState = { bos: null, icn: null }; // { ri, ci } per segment
+var priceDropOn      = false; // price drop toggle state (independent of which review screen is shown)
+var reviewBase       = 3200; // base trip total for the current review screen ($3,200 or $2,950)
+var lastReviewScreen = 0;    // which review screen (0 / 8 / 10) was last visited
+var bagsAdded        = false; // +$45 checked bag
+var protectionAdded  = false; // +$89 flight protection plus
+
+function seatCost(st) { return st && st.ri < 4 ? 25 : 0; }
+function calcTotal() {
+  return reviewBase
+    + (priceDropOn     ? 25 : 0)
+    + seatCost(seatState.bos)
+    + seatCost(seatState.icn)
+    + (bagsAdded       ? 45 : 0)
+    + (protectionAdded ? 89 : 0);
+}
+
+// Seat screens: index → segment key
+var SEAT_SCREEN_MAP = { 1: 'bos', 14: 'icn' };
+
+var SC = 282 / 375; // display scale
+
+function seatColPng(ci) { return 48 + ci * 50 + (ci >= 3 ? 10 : 0); }
+function px(v) { return Math.round(v * SC); }
+
+function colLetter(ci) { return 'ABCDEF'[ci]; }
+
+function renderSeatOverlay(seg) {
+  var sel = seatState[seg]; // { ri, ci } or null
+
+  var wrap = document.createElement('div');
+  wrap.id = 'seatOverlay';
+  wrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+
+  // ── 1. Seat cell hit-targets ───────────────────────────────────────────────
+  for (var ri = 0; ri < 9; ri++) {
+    for (var ci = 0; ci < 6; ci++) {
+      var isPaid = ri < 4;
+      var isSel  = sel && sel.ri === ri && sel.ci === ci;
+      var cell   = document.createElement('div');
+      var pngY   = 306 + ri * 40;
+      cell.style.cssText =
+        'position:absolute;border-radius:6px;cursor:pointer;pointer-events:all;' +
+        'display:flex;align-items:center;justify-content:center;box-sizing:border-box;';
+      cell.style.left   = px(seatColPng(ci)) + 'px';
+      cell.style.top    = px(pngY) + 'px';
+      cell.style.width  = px(44) + 'px';
+      cell.style.height = px(34) + 'px';
+      if (isSel) {
+        cell.style.background    = '#0062cc';
+        cell.style.color         = '#fff';
+        cell.style.fontSize      = '11px';
+        cell.style.fontWeight    = '700';
+        cell.innerHTML           = '&#10003;';
+      } else {
+        // transparent — lets the PNG show through, just captures the click
+        cell.style.background = 'transparent';
+      }
+      (function(r, c, s) {
+        cell.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // toggle off if already selected
+          if (seatState[s] && seatState[s].ri === r && seatState[s].ci === c) {
+            seatState[s] = null;
+          } else {
+            seatState[s] = { ri: r, ci: c };
+          }
+          var old = document.getElementById('seatOverlay');
+          if (old) old.remove();
+          renderSeatOverlay(s);
+        });
+      })(ri, ci, seg);
+      wrap.appendChild(cell);
+    }
+  }
+
+  // ── 2. Traveler pill overlay ───────────────────────────────────────────────
+  // Covers the PNG pill (y=212, h=36, x=24, w=327)
+  var pill = document.createElement('div');
+  var pillText = sel
+    ? 'Traveler 1 \u2014 Seat ' + colLetter(sel.ci) + (sel.ri + 1) + '\u2002(Business)'
+    : 'Traveler 1 \u2014 No seat selected';
+  pill.style.cssText =
+    'position:absolute;border-radius:14px;border:1px solid rgb(203,213,225);' +
+    'background:rgb(241,245,249);display:flex;align-items:center;justify-content:center;' +
+    'pointer-events:none;box-sizing:border-box;';
+  pill.style.top    = px(212) + 'px';
+  pill.style.left   = px(24)  + 'px';
+  pill.style.width  = px(327) + 'px';
+  pill.style.height = px(36)  + 'px';
+  var pillSpan = document.createElement('span');
+  pillSpan.textContent = pillText;
+  pillSpan.style.cssText = 'font-size:9px;font-weight:500;color:#0c0e1c;font-family:inherit;';
+  pill.appendChild(pillSpan);
+  wrap.appendChild(pill);
+
+  // ── 3. Seat count text overlay ─────────────────────────────────────────────
+  var countDiv = document.createElement('div');
+  var countText = 'Business Class  \u00b7  ' + (sel ? '1' : '0') + ' of 1 seat selected';
+  countDiv.textContent = countText;
+  countDiv.style.cssText =
+    'position:absolute;width:100%;text-align:center;font-size:9px;color:#67697d;' +
+    'pointer-events:none;font-family:inherit;background:#fff;padding:2px 0;';
+  countDiv.style.top = px(264) + 'px';
+  wrap.appendChild(countDiv);
+
+  // ── 4. Sticky footer overlay ───────────────────────────────────────────────
+  // Covers PNG sticky_seats area (y=706 = SH-106, height=106)
+  var totalSeatCost = seatCost(seatState.bos) + seatCost(seatState.icn);
+  var seatPrice = totalSeatCost; // shown as "Seats total" — both segments combined
+  var tripTotal = reviewBase + (priceDropOn ? 25 : 0) + totalSeatCost;
+  var footerTop = px(706);
+
+  var footer = document.createElement('div');
+  footer.style.cssText =
+    'position:absolute;left:0;right:0;background:#fff;border-top:1px solid #dfe0e4;' +
+    'pointer-events:none;box-sizing:border-box;';
+  footer.style.top    = footerTop + 'px';
+  footer.style.height = px(106) + 'px';
+
+  // Seats total row
+  var stRow = document.createElement('div');
+  stRow.style.cssText = 'position:absolute;left:0;right:0;display:flex;justify-content:space-between;padding:0 ' + px(24) + 'px;';
+  stRow.style.top = px(14) + 'px';
+  var stLbl = document.createElement('span');
+  stLbl.textContent = 'Seats total';
+  stLbl.style.cssText = 'font-size:10px;color:#67697d;font-family:inherit;';
+  var stVal = document.createElement('span');
+  stVal.textContent = seatPrice > 0 ? '$' + seatPrice : '$0';
+  stVal.style.cssText = 'font-size:10px;font-weight:700;color:#0c0e1c;font-family:inherit;';
+  stRow.appendChild(stLbl); stRow.appendChild(stVal);
+  footer.appendChild(stRow);
+
+  // Divider
+  var div1 = document.createElement('div');
+  div1.style.cssText = 'position:absolute;left:0;right:0;height:1px;background:#dfe0e4;';
+  div1.style.top = px(38) + 'px';
+  footer.appendChild(div1);
+
+  // Trip total
+  var ttDiv = document.createElement('div');
+  ttDiv.textContent = 'Trip total: $' + tripTotal.toLocaleString();
+  ttDiv.style.cssText = 'position:absolute;font-size:11px;font-weight:700;color:#0c0e1c;font-family:inherit;';
+  ttDiv.style.top  = px(52) + 'px';
+  ttDiv.style.left = px(24) + 'px';
+  footer.appendChild(ttDiv);
+
+  // Price details (clickable — navigates to price details sub-screen)
+  var pdTarget = (seatPrice > 0) ? 16 : 13; // 16=price details with seat, 13=base price details
+  var pdDiv = document.createElement('div');
+  pdDiv.textContent = 'Price details';
+  pdDiv.style.cssText =
+    'position:absolute;font-size:9px;color:#0062cc;cursor:pointer;pointer-events:all;font-family:inherit;';
+  pdDiv.style.top  = px(70) + 'px';
+  pdDiv.style.left = px(24) + 'px';
+  pdDiv.addEventListener('click', function(e) { e.stopPropagation(); go(pdTarget); });
+  footer.appendChild(pdDiv);
+
+  // Next: Bags button
+  var btn = document.createElement('div');
+  btn.style.cssText =
+    'position:absolute;border-radius:21px;background:#0062cc;display:flex;align-items:center;' +
+    'justify-content:center;cursor:pointer;pointer-events:all;';
+  btn.style.left   = px(375 - 172) + 'px';
+  btn.style.top    = px(44) + 'px';
+  btn.style.width  = px(156) + 'px';
+  btn.style.height = px(48)  + 'px';
+  var btnSpan = document.createElement('span');
+  btnSpan.textContent = 'Next: Bags';
+  btnSpan.style.cssText = 'font-size:10px;font-weight:700;color:#fff;font-family:inherit;pointer-events:none;';
+  btn.appendChild(btnSpan);
+  btn.addEventListener('click', function(e) { e.stopPropagation(); go(2); });
+  footer.appendChild(btn);
+
+  wrap.appendChild(footer);
+  hotspotLayer.appendChild(wrap);
+}
+
+var current = 0;
+
+var img       = document.getElementById('screenImg');
+var btnPrev   = document.getElementById('btnPrev');
+var btnNext   = document.getElementById('btnNext');
+var progress  = document.getElementById('progress');
+var thumbList = document.getElementById('thumbList');
+var stepCtr   = document.getElementById('stepCounter');
+var titleEl   = document.getElementById('screenTitle');
+var badgeEl   = document.getElementById('screenBadge');
+var annotEl   = document.getElementById('annotation');
+var hotspotLayer = document.getElementById('hotspotLayer');
+
+// Build progress dots (only main flow screens 0-5)
+SCREENS.forEach(function(s, i) {
+  if (s.subScreen) return;
+  var dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.addEventListener('click', function() { go(i); });
+  progress.appendChild(dot);
+});
+
+// Build thumbnail strip
+SCREENS.forEach(function(s, i) {
+  var item = document.createElement('div');
+  item.className = 'thumb-item' + (i === 0 ? ' active' : '') + (s.subScreen ? ' sub-screen' : '');
+  var starHtml = s.star ? ' <span class="thumb-star">&#9733;</span>' : '';
+  var subLabel = s.subScreen ? '<div class="thumb-sub-label">interaction</div>' : '';
+  item.innerHTML =
+    '<div class="thumb-img"><img src="' + s.file + '" alt="' + s.title + '" loading="lazy"></div>' +
+    '<div class="thumb-meta">' +
+      '<div class="thumb-num">Screen ' + (i + 1) + '</div>' +
+      '<div class="thumb-name">' + s.title + starHtml + '</div>' +
+      subLabel +
+    '</div>';
+  item.addEventListener('click', function() { go(i); });
+  thumbList.appendChild(item);
+});
+
+// Build hotspot divs for current screen
+function renderHotspots(s) {
+  hotspotLayer.innerHTML = '';
+  if (!s.hotspots || !s.hotspots.length) return;
+  for (var h = 0; h < s.hotspots.length; h++) {
+    var hp = s.hotspots[h];
+    var hDiv = document.createElement('div');
+    hDiv.className = 'hotspot';
+    hDiv.style.top    = hp.top + 'px';
+    hDiv.style.height = hp.height + 'px';
+    hDiv.style.width  = hp.width + 'px';
+    if (hp.left !== null) { hDiv.style.left  = hp.left  + 'px'; }
+    if (hp.right !== null) { hDiv.style.right = hp.right + 'px'; }
+    hDiv.title = 'Tap to interact';
+    (function(target) {
+      hDiv.addEventListener('click', function() { go(target); });
+    })(hp.target);
+    hotspotLayer.appendChild(hDiv);
+  }
+}
+
+// ── Shared helper: build a trip-total cover+text div pair ──────────────────────
+function makeTotalOverlay(cssTop, cssLeft) {
+  var frag = document.createDocumentFragment();
+  var cover = document.createElement('div');
+  cover.style.cssText = 'position:absolute;background:#fff;top:' + (cssTop - 4) + 'px;left:0;width:148px;height:18px;';
+  frag.appendChild(cover);
+  var txt = document.createElement('div');
+  txt.textContent = 'Trip total: $' + calcTotal().toLocaleString();
+  txt.style.cssText = 'position:absolute;top:' + cssTop + 'px;left:' + cssLeft + 'px;' +
+    'font-size:11px;font-weight:700;color:#0C0E1C;' +
+    'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;white-space:nowrap;';
+  frag.appendChild(txt);
+  return frag;
+}
+
+// ── Bags footer overlay — corrects trip total on bag screens ───────────────────
+// sticky_simple: Y = SH-82 = 730 PNG → trip total at Y+14 = 744 → CSS ≈ 559
+function renderBagsFooterOverlay() {
+  var wrap = document.createElement('div');
+  wrap.id = 'bagsFooterOverlay';
+  wrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+  wrap.appendChild(makeTotalOverlay(559, 18));
+  hotspotLayer.appendChild(wrap);
+}
+
+// ── Protection footer overlay — corrects trip total on protection screens ───────
+// sticky(): Y = SH-130 = 682 PNG → trip total at Y+52 = 734 → CSS ≈ 552
+function renderProtectionFooterOverlay() {
+  var wrap = document.createElement('div');
+  wrap.id = 'protFooterOverlay';
+  wrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+  wrap.appendChild(makeTotalOverlay(552, 18));
+  hotspotLayer.appendChild(wrap);
+}
+
+// ── Dynamic price details bottom sheet ────────────────────────────────────────
+function showPriceDetails() {
+  var existing = document.getElementById('priceDetailsModal');
+  if (existing) { existing.remove(); return; }
+
+  var overlay = document.createElement('div');
+  overlay.id = 'priceDetailsModal';
+  overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;z-index:200;pointer-events:all;';
+
+  // Tap-away backdrop
+  var backdrop = document.createElement('div');
+  backdrop.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.35);';
+  backdrop.addEventListener('click', function() { overlay.remove(); });
+  overlay.appendChild(backdrop);
+
+  // Bottom sheet
+  var sheet = document.createElement('div');
+  sheet.style.cssText =
+    'position:absolute;bottom:0;left:0;width:100%;background:#fff;' +
+    'border-radius:14px 14px 0 0;padding:16px 16px 12px;box-sizing:border-box;';
+  sheet.addEventListener('click', function(e) { e.stopPropagation(); });
+  overlay.appendChild(sheet);
+
+  // Title
+  var title = document.createElement('div');
+  title.textContent = 'Price details';
+  title.style.cssText = 'font-size:13px;font-weight:700;color:#0C0E1C;margin-bottom:10px;font-family:inherit;';
+  sheet.appendChild(title);
+
+  var hr1 = document.createElement('div');
+  hr1.style.cssText = 'height:1px;background:#DFE0E4;margin-bottom:6px;';
+  sheet.appendChild(hr1);
+
+  // Build line items from current state
+  var items = [];
+  items.push({ label: 'Flight fare', value: '$' + reviewBase.toLocaleString() });
+  if (priceDropOn)      { items.push({ label: 'Price Drop Protection', value: '$25',  accent: '#0062CC' }); }
+  if (seatState.bos) {
+    var bc = seatCost(seatState.bos);
+    var bLabel = 'Seat · BOS\u2192ICN (' + 'ABCDEF'[seatState.bos.ci] + (seatState.bos.ri+1) + ')';
+    items.push({ label: bLabel, value: bc > 0 ? '$'+bc : 'Included' });
+  }
+  if (seatState.icn) {
+    var ic = seatCost(seatState.icn);
+    var iLabel = 'Seat · ICN\u2192SIN (' + 'ABCDEF'[seatState.icn.ci] + (seatState.icn.ri+1) + ')';
+    items.push({ label: iLabel, value: ic > 0 ? '$'+ic : 'Included' });
+  }
+  if (bagsAdded)        { items.push({ label: 'Checked bag',             value: '$45' }); }
+  if (protectionAdded)  { items.push({ label: 'Flight Protection Plus',  value: '$89', accent: '#00A15E' }); }
+  items.push({ label: 'Taxes & fees', value: 'Included', muted: true });
+
+  items.forEach(function(item) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;padding:5px 0;';
+    var lbl = document.createElement('span');
+    lbl.textContent = item.label;
+    lbl.style.cssText = 'font-size:10px;color:' + (item.muted ? '#67687D' : '#0C0E1C') + ';font-family:inherit;';
+    var val = document.createElement('span');
+    val.textContent = item.value;
+    val.style.cssText = 'font-size:10px;font-weight:700;color:' + (item.accent || (item.muted ? '#67687D' : '#0C0E1C')) + ';font-family:inherit;';
+    row.appendChild(lbl); row.appendChild(val);
+    sheet.appendChild(row);
+  });
+
+  var hr2 = document.createElement('div');
+  hr2.style.cssText = 'height:1px;background:#DFE0E4;margin:8px 0 6px;';
+  sheet.appendChild(hr2);
+
+  // Total row
+  var totalRow = document.createElement('div');
+  totalRow.style.cssText = 'display:flex;justify-content:space-between;padding:4px 0 10px;';
+  var tLbl = document.createElement('span');
+  tLbl.textContent = 'Total';
+  tLbl.style.cssText = 'font-size:12px;font-weight:700;color:#0C0E1C;font-family:inherit;';
+  var tVal = document.createElement('span');
+  tVal.textContent = '$' + calcTotal().toLocaleString();
+  tVal.style.cssText = 'font-size:12px;font-weight:700;color:#0C0E1C;font-family:inherit;';
+  totalRow.appendChild(tLbl); totalRow.appendChild(tVal);
+  sheet.appendChild(totalRow);
+
+  // Close button
+  var closeBtn = document.createElement('div');
+  closeBtn.textContent = 'Close';
+  closeBtn.style.cssText =
+    'background:#0062CC;color:#fff;text-align:center;padding:9px;border-radius:20px;' +
+    'cursor:pointer;font-size:11px;font-weight:700;font-family:inherit;';
+  closeBtn.addEventListener('click', function(e) { e.stopPropagation(); overlay.remove(); });
+  sheet.appendChild(closeBtn);
+
+  hotspotLayer.appendChild(overlay);
+}
+
+// ── Price Drop overlay (drawn on top of whatever review screen is active) ──────
+function renderPriceDropOverlay() {
+  var old = document.getElementById('priceDropOverlay');
+  if (old) old.remove();
+  if (!priceDropOn) return;
+
+  var wrap = document.createElement('div');
+  wrap.id = 'priceDropOverlay';
+  wrap.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+
+  // ── 1. Cover the gray OFF pill and draw a blue ON pill ─────────────────────
+  // The toggle bounding box in CSS matches the hotspot: top:463 left:225 w:50 h:34
+  var cover = document.createElement('div');
+  cover.style.cssText = 'position:absolute;background:#fff;top:463px;left:223px;width:54px;height:34px;';
+  wrap.appendChild(cover);
+
+  // Blue pill — clickable to turn OFF
+  var pill = document.createElement('div');
+  pill.style.cssText =
+    'position:absolute;background:#0062CC;border-radius:13px;cursor:pointer;pointer-events:all;' +
+    'top:468px;left:226px;width:44px;height:24px;';
+  pill.addEventListener('click', function(e) {
+    e.stopPropagation();
+    priceDropOn = false;
+    renderPriceDropOverlay();
+  });
+  wrap.appendChild(pill);
+
+  // White knob — right side (ON state)
+  var knob = document.createElement('div');
+  knob.style.cssText =
+    'position:absolute;background:#fff;border-radius:50%;pointer-events:none;' +
+    'top:471px;left:252px;width:18px;height:18px;';
+  wrap.appendChild(knob);
+
+  // ── 2. Cover old total and write updated total ─────────────────────────────
+  // sticky_simple draws "Trip total: $X" at PNG (24, Y+14) where Y=730 → CSS ≈ top:559 left:18
+  // Width capped at 148px so it never overlaps the Next:Seats button (which starts at left:153)
+  var totalCover = document.createElement('div');
+  totalCover.style.cssText = 'position:absolute;background:#fff;top:555px;left:0;width:148px;height:18px;';
+  wrap.appendChild(totalCover);
+
+  var totalDiv = document.createElement('div');
+  totalDiv.textContent = 'Trip total: $' + (reviewBase + 25).toLocaleString();
+  totalDiv.style.cssText =
+    'position:absolute;top:556px;left:18px;font-size:11px;font-weight:700;' +
+    'color:#0C0E1C;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;white-space:nowrap;';
+  wrap.appendChild(totalDiv);
+
+  // ── 3. Intercept "Price details" link → show price breakdown with $25 ──────
+  // sticky_simple draws "Price details" at PNG (24, Y+38) where Y=730 → CSS ≈ top:578 left:18
+  // Width kept narrow (left side only) so it never touches the button
+  var pdDiv = document.createElement('div');
+  pdDiv.style.cssText =
+    'position:absolute;top:573px;left:0;width:100px;height:16px;cursor:pointer;pointer-events:all;';
+  pdDiv.addEventListener('click', function(e) { e.stopPropagation(); showPriceDetails(); });
+  wrap.appendChild(pdDiv);
+
+  hotspotLayer.appendChild(wrap);
+}
+
+// Render a screen
+function go(idx) {
+  if (idx < 0 || idx >= SCREENS.length) return;
+
+  var REVIEW_SCREENS = [0, 8, 10, 31];
+
+  // Any "Price details" link → show dynamic modal, never navigate to static PNGs
+  // Indices: 11=base, 13=no-seat, 16=one-seat, 17=both-seats, 20=bags, 23=prot, 24=prot-added, 26=price-drop
+  if ([11, 13, 16, 17, 20, 23, 24, 26].indexOf(idx) !== -1) {
+    showPriceDetails();
+    return;
+  }
+
+  // Toggle hotspot (target:25) tapped while on a review screen
+  // → flip overlay in-place, don't navigate away
+  if (idx === 25 && REVIEW_SCREENS.indexOf(current) !== -1) {
+    priceDropOn = !priceDropOn;
+    renderPriceDropOverlay();
+    return;
+  }
+
+  // "Close" on the price-details-review screen (26) → return to last review screen
+  if (idx === 25 && current === 26) { idx = lastReviewScreen; }
+
+  // Flight list: redirect to Korean Air-selected variant when KA is already selected
+  if (idx === 7 && lastReviewScreen === 31) { idx = 32; }
+  if (idx === 9 && lastReviewScreen === 31) { idx = 33; }
+
+  // Back from seats (1) or original flight lists (7, 9) always returns to last review screen
+  // (preserves flight change: e.g. stays on Korean Air review instead of resetting to screen 0)
+  // Note: screens 32/33 (KA-selected variants) use direct targets, no redirect needed
+  if (idx === 0 && (current === 1 || current === 7 || current === 9)) { idx = lastReviewScreen; }
+
+  // Track which review screen is currently displayed
+  if (REVIEW_SCREENS.indexOf(idx) !== -1) {
+    lastReviewScreen = idx;
+    reviewBase = (idx === 0) ? 3200 : 2950;
+  }
+
+  // Track bag state (19 = BOS bag added, 22 = ICN bag added; back unsets)
+  if (idx === 19 || idx === 22) { bagsAdded = true; }
+  if (idx === 2  && current === 19) { bagsAdded = false; }
+  if (idx === 21 && current === 22) { bagsAdded = false; }
+
+  // Track protection state (4 = checked, back to 3 = unchecked)
+  if (idx === 4) { protectionAdded = true; }
+  if (idx === 3 && current === 4) { protectionAdded = false; }
+
+  current = idx;
+  var s = SCREENS[idx];
+
+  // Fade transition
+  img.classList.add('fade-out');
+  setTimeout(function() {
+    img.src = s.file;
+    img.classList.remove('fade-out');
+  }, 150);
+
+  // Hotspots
+  renderHotspots(s);
+
+  // Interactive seat overlay (replaces static per-seat navigation)
+  if (SEAT_SCREEN_MAP[idx] !== undefined) {
+    renderSeatOverlay(SEAT_SCREEN_MAP[idx]);
+  }
+
+  // Price drop overlay — re-render on review screens, clear everywhere else
+  if (REVIEW_SCREENS.indexOf(idx) !== -1 && priceDropOn) {
+    renderPriceDropOverlay();
+  } else {
+    var pdOld = document.getElementById('priceDropOverlay');
+    if (pdOld) pdOld.remove();
+  }
+
+  // Bags footer overlay — correct trip total on all bag screens
+  if ([2, 19, 21, 22].indexOf(idx) !== -1) { renderBagsFooterOverlay(); }
+
+  // Protection footer overlay — correct trip total on protection screens
+  if ([3, 4].indexOf(idx) !== -1) { renderProtectionFooterOverlay(); }
+
+  // Left panel
+  var mainIdx = 0;
+  for (var p = 0; p <= idx; p++) { if (!SCREENS[p].subScreen) mainIdx++; }
+  stepCtr.textContent = s.subScreen ? 'Interaction screen' : ('Step ' + mainIdx + ' of 6');
+  titleEl.textContent = s.title;
+  badgeEl.textContent = s.badge + (s.star ? ' \u2605' : '');
+  badgeEl.className = 'screen-badge ' + s.bClass;
+
+  // Annotation
+  var bulletHtml = '';
+  for (var j = 0; j < s.bullets.length; j++) {
+    bulletHtml += '<li>' + s.bullets[j] + '</li>';
+  }
+  annotEl.innerHTML =
+    '<span class="tag ' + s.tagClass + '">' + s.tag + '</span>' +
+    '<p>' + s.body + '</p>' +
+    '<ul>' + bulletHtml + '</ul>';
+
+  // Buttons — respect custom prevIdx/nextIdx
+  var prevI = (s.prevIdx !== undefined) ? s.prevIdx : idx - 1;
+  var nextI = (s.nextIdx !== undefined) ? s.nextIdx : idx + 1;
+  btnPrev.disabled = (prevI === null || prevI < 0);
+  btnNext.disabled = (nextI === null || nextI >= SCREENS.length);
+
+  // Dots (only main flow)
+  var dotEls = document.querySelectorAll('.dot');
+  var di = 0;
+  for (var k = 0; k < SCREENS.length; k++) {
+    if (SCREENS[k].subScreen) continue;
+    if (k === idx) { dotEls[di].classList.add('active'); }
+    else           { dotEls[di].classList.remove('active'); }
+    di++;
+  }
+
+  // Thumbnails
+  var thumbs = document.querySelectorAll('.thumb-item');
+  for (var m = 0; m < thumbs.length; m++) {
+    if (m === idx) { thumbs[m].classList.add('active'); }
+    else           { thumbs[m].classList.remove('active'); }
+  }
+
+  // Thumbnail highlight only — no scroll so focus stays on the phone
+}
+
+// Nav buttons — respect custom navigation
+btnPrev.addEventListener('click', function() {
+  var s = SCREENS[current];
+  var prevI = (s.prevIdx !== undefined) ? s.prevIdx : current - 1;
+  if (prevI !== null && prevI >= 0) go(prevI);
+});
+btnNext.addEventListener('click', function() {
+  var s = SCREENS[current];
+  var nextI = (s.nextIdx !== undefined) ? s.nextIdx : current + 1;
+  if (nextI !== null && nextI < SCREENS.length) go(nextI);
+});
+
+// Keyboard nav
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowRight') {
+    var s = SCREENS[current];
+    var nextI = (s.nextIdx !== undefined) ? s.nextIdx : current + 1;
+    if (nextI !== null) go(nextI);
+  }
+  if (e.key === 'ArrowLeft') {
+    var s2 = SCREENS[current];
+    var prevI = (s2.prevIdx !== undefined) ? s2.prevIdx : current - 1;
+    if (prevI !== null) go(prevI);
+  }
+});
+
+// Init
+go(0);
+</script>
+</body>
+</html>
