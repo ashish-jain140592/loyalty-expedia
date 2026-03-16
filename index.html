@@ -1915,11 +1915,24 @@ function go(idx) {
     '<p>' + s.body + '</p>' +
     '<ul>' + bulletHtml + '</ul>';
 
-  // Buttons — respect custom prevIdx/nextIdx
-  var prevI = (s.prevIdx !== undefined) ? s.prevIdx : idx - 1;
-  var nextI = (s.nextIdx !== undefined) ? s.nextIdx : idx + 1;
-  btnPrev.disabled = (prevI === null || prevI < 0);
-  btnNext.disabled = (nextI === null || nextI >= SCREENS.length);
+  // Checkout screens: replace bullets with live price breakdown from state
+  if (idx === 27 || idx === 29) {
+    var lines = [];
+    lines.push('Flight fare: <strong>$' + reviewBase.toLocaleString() + '</strong>');
+    if (priceDropOn)     lines.push('Price Drop Protection: <strong>$25</strong>');
+    var bsc = seatCost(seatState.bos), isc = seatCost(seatState.icn);
+    if (bsc > 0)         lines.push('Seat (BOS \u2192 ICN): <strong>$' + bsc + '</strong>');
+    if (isc > 0)         lines.push('Seat (ICN \u2192 SIN): <strong>$' + isc + '</strong>');
+    if (bagsAdded)       lines.push('Checked bag: <strong>$45</strong>');
+    if (protectionAdded) lines.push('Flight Protection Plus: <strong>$89</strong>');
+    lines.push('<strong>Total: $' + calcTotal().toLocaleString() + '</strong>');
+    var dynHtml = '';
+    for (var li = 0; li < lines.length; li++) { dynHtml += '<li>' + lines[li] + '</li>'; }
+    annotEl.innerHTML =
+      '<span class="tag tag-green">CHECKOUT</span>' +
+      '<p>Price summary based on your selections.</p>' +
+      '<ul>' + dynHtml + '</ul>';
+  }
 
   // Dots (only main flow)
   var dotEls = document.querySelectorAll('.dot');
